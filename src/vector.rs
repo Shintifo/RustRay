@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, Index, Mul, Sub, SubAssign};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
     pub(crate) x: f32,
     pub(crate) y: f32,
