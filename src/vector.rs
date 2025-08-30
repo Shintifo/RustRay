@@ -1,10 +1,10 @@
 use std::ops::{Add, AddAssign, Div, Index, Mul, Sub, SubAssign};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
-    x: f32,
-    y: f32,
-    z: f32,
+    pub(crate) x: f32,
+    pub(crate) y: f32,
+    pub(crate) z: f32,
 }
 
 impl Vec3 {
@@ -33,15 +33,14 @@ impl Vec3 {
     }
 
     pub fn unit_vector(&self) -> Vec3 {
-        println!("{}", self.length());
         self / self.length()
     }
 }
 
-impl<'a, 'b> Add<&'a Vec3> for &Vec3 {
+impl Add for Vec3 {
     type Output = Vec3;
 
-    fn add(self, other: &Vec3) -> Vec3 {
+    fn add(self, other: Vec3) -> Vec3 {
         Vec3 {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -50,9 +49,9 @@ impl<'a, 'b> Add<&'a Vec3> for &Vec3 {
     }
 }
 
-impl<'a, 'b> Sub<&'a Vec3> for &'b Vec3 {
+impl Sub for Vec3 {
     type Output = Vec3;
-    fn sub(self, other: &'a Vec3) -> Vec3 {
+    fn sub(self, other: Vec3) -> Vec3 {
         Vec3 {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -84,13 +83,12 @@ impl Div<f32> for &Vec3 {
     }
 }
 
-impl Mul<f32> for &Vec3 {
+impl Mul<f32> for Vec3 {
     type Output = Vec3;
     fn mul(self, scalar: f32) -> Self::Output {
         Vec3::new(self.x * scalar, self.y * scalar, self.z * scalar)
     }
 }
-
 
 impl Index<usize> for Vec3 {
     type Output = f32;
