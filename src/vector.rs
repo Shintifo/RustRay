@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Index, Mul, Sub, SubAssign};
 
 #[derive(Debug)]
 pub struct Vec3 {
@@ -88,5 +88,19 @@ impl Mul<f32> for &Vec3 {
     type Output = Vec3;
     fn mul(self, scalar: f32) -> Self::Output {
         Vec3::new(self.x * scalar, self.y * scalar, self.z * scalar)
+    }
+}
+
+
+impl Index<usize> for Vec3 {
+    type Output = f32;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!("Index out of bounds"),
+        }
     }
 }
