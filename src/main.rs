@@ -1,3 +1,5 @@
+mod background;
+mod pixel;
 mod ray;
 mod shapes;
 mod vector;
@@ -5,18 +7,17 @@ mod vector;
 use std::fs::File;
 use std::io::Write;
 
+use crate::background::make_background;
+use crate::pixel::PixelRGB;
 use crate::ray::Ray;
 use shapes::Shape;
 use vector::Vec3;
 
 fn color(ray: &Ray, base_color: &Vec3) -> Vec3 {
     let dir = ray.direction.unit_vector();
-    let t: f32 = 0.5 * (dir.y + 1.0);
-
-    let t =  (dir.y*dir.y + dir.x * dir.x).sqrt() * 2.0;
+    let t = (dir.y * dir.y + dir.x * dir.x).sqrt() * 2.0;
 
     *base_color * (2.0 - t) + Vec3::new(0.0, 0.0, 0.0) * t
-    // Vec3::new(0.1, 1.0, 0.6) * t +
 }
 
 fn color_shape(ray: &Ray, shape: &Shape, base_color: &Vec3) -> Vec3 {
@@ -59,7 +60,6 @@ fn show() {
             let v = j as f32 / ny as f32;
             let r = Ray::new(origin, ll_corner + horizontal * u + vertical * v);
 
-
             let mut color = color_shape(&r, &cube, &Vec3::new(0.1, 1.0, 0.6));
             if color == Vec3::new(1., 1., 1.) {
                 color = color_shape_inv(&r, &cube2);
@@ -69,7 +69,6 @@ fn show() {
                 }
             }
 
-
             let ir = (255.0 * color[0]) as u8;
             let ig = (255.0 * color[1]) as u8;
             let ib = (255.0 * color[2]) as u8;
@@ -78,6 +77,21 @@ fn show() {
     }
 }
 
+fn plot() {
+    let nx = 200;
+    let ny = 100;
+
+    let color = PixelRGB::new(0.5, 0.7, 1.0);
+    let pixels = make_background(&color, nx, ny);
+
+    let mut file = File::create("test.ppm").unwrap();
+    writeln!(file, "P3\n{} {}\n255", nx, ny).unwrap();
+
+    for pixel in pixels {
+        writeln!(file, "{}", pixel).unwrap();
+    }
+}
+
 fn main() {
-    show()
+    plot()
 }
