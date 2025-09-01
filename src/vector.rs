@@ -37,7 +37,7 @@ impl Vec3 {
         if len == 0.0 {
             Vec3::default()
         } else {
-            self / self.length()
+            self / len
         }
     }
 }

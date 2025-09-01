@@ -27,14 +27,16 @@ impl Shape {
     }
 
     pub(crate) fn ray_hit(&self, ray: &Ray) -> bool {
+        let unit = ray.direction.unit_vector();
+
         match self {
             Shape::Sphere { center, radius } => {
                 let oc = ray.origin - *center;
-                let a = ray.direction.dot(&ray.direction);
-                let b = 2.0 * ray.direction.dot(&oc);
+                let a = unit.dot(&unit);
+                let half_b = unit.dot(&oc);
                 let c = oc.dot(&oc) - (radius * radius);
 
-                let discriminant = b * b - 4.0 * a * c;
+                let discriminant = half_b * half_b - a * c;
                 discriminant > 0.0
             }
             Shape::Cube { center, side } => {
