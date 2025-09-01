@@ -37,7 +37,15 @@ impl Shape {
                 let c = oc.dot(&oc) - (radius * radius);
 
                 let discriminant = half_b * half_b - a * c;
-                discriminant > 0.0
+                if discriminant < 0.0 {
+                    return false;
+                }
+
+                let sqrtd = discriminant.sqrt();
+                let t1 = (-half_b - sqrtd) / a;
+                let t2 = (-half_b + sqrtd) / a;
+
+                t1 > 1e-6 || t2 > 1e-6
             }
             Shape::Cube { center, side } => {
                 let half = side / 2.0;
