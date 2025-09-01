@@ -30,20 +30,18 @@ impl Shape {
         match self {
             Shape::Sphere { center, radius } => {
                 let oc = ray.origin - *center;
-                let a = ray.direction.squared_length();
-                let b = 2.0 * oc.dot(&ray.direction);
-                let c = oc.squared_length() - (radius * radius);
+                let a = ray.direction.dot(&ray.direction);
+                let b = 2.0 * ray.direction.dot(&oc);
+                let c = oc.dot(&oc) - (radius * radius);
 
                 let discriminant = b * b - 4.0 * a * c;
                 discriminant > 0.0
             }
             Shape::Cube { center, side } => {
-                let x =
-                    ((center.x - side / 2.0)..=(center.x + side / 2.0)).contains(&ray.direction.x);
-                let y =
-                    ((center.y - side / 2.0)..=(center.y + side / 2.0)).contains(&ray.direction.y);
-                let z =
-                    ((center.z - side / 2.0)..=(center.z + side / 2.0)).contains(&ray.direction.z);
+                let half = side / 2.0;
+                let x = ((center.x - half)..=(center.x + half)).contains(&ray.direction.x);
+                let y = ((center.y - half)..=(center.y + half)).contains(&ray.direction.y);
+                let z = ((center.z - half)..=(center.z + half)).contains(&ray.direction.z);
 
                 x && y && z
             }

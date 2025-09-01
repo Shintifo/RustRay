@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Index, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Index, Mul, Sub, SubAssign};
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub(crate) struct Vec3 {
@@ -32,8 +32,13 @@ impl Vec3 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub(crate) fn unit_vector(&self) -> Vec3 {
-        *self / self.length()
+    pub(crate) fn unit_vector(self) -> Vec3 {
+        let len = self.length();
+        if len == 0.0 {
+            Vec3::default()
+        } else {
+            self / self.length()
+        }
     }
 }
 
