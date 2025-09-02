@@ -25,8 +25,14 @@ impl Shape {
     pub(crate) fn cube(center: Vec3, side: f32) -> Shape {
         Shape::Cube { center, side }
     }
+}
 
-    pub(crate) fn ray_hit(&self, ray: &Ray) -> bool {
+pub(crate) trait HitAble {
+    fn ray_hit(&self, ray: &Ray) -> f32;
+}
+
+impl HitAble for Shape {
+    fn ray_hit(&self, ray: &Ray) -> f32 {
         let unit = ray.direction.unit_vector();
 
         match self {
@@ -38,14 +44,21 @@ impl Shape {
 
                 let discriminant = half_b * half_b - a * c;
                 if discriminant < 0.0 {
-                    return false;
+                    return -1.0;
                 }
 
                 let sqrtd = discriminant.sqrt();
                 let t1 = (-half_b - sqrtd) / a;
                 let t2 = (-half_b + sqrtd) / a;
 
-                t1 > 1e-6 || t2 > 1e-6
+                // TODO: what root we should use?
+                if t1 > 1e-6 {
+                    return t1;
+                }
+                if t2 > 1e-6 {
+                    return t2;
+                }
+                -1.0
             }
             Shape::Cube { center, side } => {
                 let half = side / 2.0;
@@ -53,9 +66,13 @@ impl Shape {
                 let y = ((center.y - half)..=(center.y + half)).contains(&ray.direction.y);
                 let z = ((center.z - half)..=(center.z + half)).contains(&ray.direction.z);
 
-                x && y && z
+                if x && y && z { 1.0 } else { -1.0 }
             }
             _ => todo!(),
         }
     }
+}
+
+pub(crate) fn ray_hit<T: HitAble>(ray: &Ray, obj: &T) -> f32 {
+    obj.ray_hit(ray)
 }
