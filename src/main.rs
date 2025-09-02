@@ -15,7 +15,7 @@ fn plot() {
     let nx = 200;
     let ny = 200;
 
-    let color = PixelRGB::new(0.5, 0.5, 1.0);
+    let color = PixelRGB::new(127, 127, 255);
 
     let mut shapes: Vec<Shape> = Vec::new();
     shapes.push(Shape::sphere(Vec3::new(1.0, 0.0, -1.0), 0.3));

@@ -1,62 +1,50 @@
 use crate::vector::Vec3;
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, AddAssign, Deref, DerefMut, Index, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Index, Mul, Sub, SubAssign};
 
-//TODO: clamp values at operands
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
-pub(crate) struct PixelRGB(Vec3);
+pub(crate) struct PixelRGB {
+    r: u8,
+    g: u8,
+    b: u8,
+}
 
 impl PixelRGB {
-    pub(crate) fn new(x: f32, y: f32, z: f32) -> Self {
-        PixelRGB(Vec3::new(
-            x.clamp(0.0, 255.99),
-            y.clamp(0.0, 255.99),
-            z.clamp(0.0, 255.99),
-        ))
+    pub(crate) fn new(r: u8, g: u8, b: u8) -> Self {
+        PixelRGB { r, g, b }
+    }
+    pub(crate) fn new_vec(vec: Vec3) -> Self {
+        PixelRGB::new(
+            vec.x.clamp(0.0, 255.0) as u8,
+            vec.y.clamp(0.0, 255.0) as u8,
+            vec.z.clamp(0.0, 255.0) as u8,
+        )
     }
     pub(crate) fn is_white(&self) -> bool {
-        self.0 == Vec3::new(1.0, 1.0, 1.0)
+        self.r == 255 && self.g == 255 && self.b == 255
     }
 
     pub(crate) fn white() -> Self {
-        PixelRGB::new(1.0, 1.0, 1.0)
+        PixelRGB::new(255, 255, 255)
     }
 
-    fn new_vec(vec: Vec3) -> Self {
-        PixelRGB::new(vec.x, vec.y, vec.z)
+    pub(crate) fn r(&self) -> u8 {
+        self.r
+    }
+
+    pub(crate) fn g(&self) -> u8 {
+        self.g
+    }
+
+    pub(crate) fn b(&self) -> u8 {
+        self.b
     }
 }
 
 impl Display for PixelRGB {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{} {} {}",
-            (self.x as u8),
-            (self.y as u8),
-            (self.z as u8)
-        )
-    }
-}
-
-impl Deref for PixelRGB {
-    type Target = Vec3;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for PixelRGB {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl Index<usize> for PixelRGB {
-    type Output = f32;
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index]
+        write!(f, "{} {} {}", self.r, self.g, self.b)
     }
 }
 
@@ -64,46 +52,66 @@ impl Add for PixelRGB {
     type Output = PixelRGB;
 
     fn add(self, other: PixelRGB) -> Self::Output {
-        PixelRGB::new_vec(self.0 + other.0)
+        let r = (self.r as u16 + other.r as u16).clamp(0, 255) as u8;
+        let g = (self.g as u16 + other.g as u16).clamp(0, 255) as u8;
+        let b = (self.b as u16 + other.b as u16).clamp(0, 255) as u8;
+        PixelRGB::new(r, g, b)
     }
 }
 
 impl Sub for PixelRGB {
     type Output = PixelRGB;
     fn sub(self, other: PixelRGB) -> Self::Output {
-        PixelRGB::new_vec(self.0 - other.0)
+        let r = (self.r as i16 - other.r as i16).clamp(0, 255) as u8;
+        let g = (self.g as i16 - other.g as i16).clamp(0, 255) as u8;
+        let b = (self.b as i16 - other.b as i16).clamp(0, 255) as u8;
+        PixelRGB::new(r, g, b)
     }
 }
 
 impl AddAssign<&PixelRGB> for PixelRGB {
     fn add_assign(&mut self, other: &Self) {
-        self.0 += other.0;
+        self.r = (self.r as u16 + other.r as u16).clamp(0, 255) as u8;
+        self.g = (self.g as u16 + other.g as u16).clamp(0, 255) as u8;
+        self.b = (self.b as u16 + other.b as u16).clamp(0, 255) as u8;
     }
 }
 
 impl SubAssign<&PixelRGB> for PixelRGB {
     fn sub_assign(&mut self, other: &Self) {
-        self.0 -= other.0;
+        self.r = (self.r as i16 - other.r as i16).clamp(0, 255) as u8;
+        self.g = (self.g as i16 - other.g as i16).clamp(0, 255) as u8;
+        self.b = (self.b as i16 - other.b as i16).clamp(0, 255) as u8;
     }
 }
 
 impl Mul<f32> for PixelRGB {
     type Output = PixelRGB;
     fn mul(self, scalar: f32) -> Self::Output {
-        PixelRGB(self.0 * scalar)
+        let r = (self.r as f32 * scalar).clamp(0.0, 255.0) as u8;
+        let g = (self.g as f32 * scalar).clamp(0.0, 255.0) as u8;
+        let b = (self.b as f32 * scalar).clamp(0.0, 255.0) as u8;
+        PixelRGB::new(r, g, b)
     }
 }
 
 impl Mul<PixelRGB> for f32 {
     type Output = PixelRGB;
     fn mul(self, pixel: PixelRGB) -> Self::Output {
-        PixelRGB(self * pixel.0)
+        pixel * self
+    }
+}
+
+impl Mul<f32> for &PixelRGB {
+    type Output = PixelRGB;
+    fn mul(self, scalar: f32) -> Self::Output {
+        *self * scalar
     }
 }
 
 impl Mul<&PixelRGB> for f32 {
     type Output = PixelRGB;
     fn mul(self, pixel: &PixelRGB) -> Self::Output {
-        PixelRGB(self * pixel.0)
+        *pixel * self
     }
 }

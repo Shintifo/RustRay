@@ -10,7 +10,7 @@ impl Ray {
         Ray { origin, direction }
     }
 
-    pub(crate) fn at(self, t: f32) -> Vec3 {
+    pub(crate) fn at(&self, t: f32) -> Vec3 {
         self.origin + (self.direction * t)
     }
 }
