@@ -27,11 +27,11 @@ impl Shape {
     }
 }
 
-pub(crate) trait HitAble {
+pub(crate) trait RayHit {
     fn ray_hit(&self, ray: &Ray) -> f32;
 }
 
-impl HitAble for Shape {
+impl RayHit for Shape {
     fn ray_hit(&self, ray: &Ray) -> f32 {
         let unit = ray.direction.unit_vector();
 
@@ -73,6 +73,6 @@ impl HitAble for Shape {
     }
 }
 
-pub(crate) fn ray_hit<T: HitAble>(ray: &Ray, obj: &T) -> f32 {
+pub(crate) fn ray_hit<T: RayHit>(ray: &Ray, obj: &T) -> f32 {
     obj.ray_hit(ray)
 }

@@ -1,7 +1,7 @@
 use crate::vector::Vec3;
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, AddAssign, Index, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub(crate) struct PixelRGB {
