@@ -1,5 +1,6 @@
 use crate::ray::Ray;
 use crate::vector::Vec3;
+use std::cmp::min;
 
 pub(crate) enum Shape {
     Sphere {
@@ -27,14 +28,30 @@ impl Shape {
     }
 }
 
+pub(crate) struct HitRecord {
+    pub(crate) t: f32,
+    pub(crate) p: Vec3,
+    pub(crate) normal: Vec3,
+}
+
+impl Default for HitRecord {
+    fn default() -> Self {
+        HitRecord {
+            t: f32::MAX,
+            p: Vec3::default(),
+            normal: Vec3::default(),
+        }
+    }
+}
+
 pub(crate) trait RayHit {
-    fn ray_hit(&self, ray: &Ray) -> f32;
+    fn ray_hit(&self, ray: &Ray, rec: &mut HitRecord) -> bool;
 }
 
 impl RayHit for Shape {
-    fn ray_hit(&self, ray: &Ray) -> f32 {
+    fn ray_hit(&self, ray: &Ray, rec: &mut HitRecord) -> bool {
         let unit = ray.direction.unit_vector();
-
+        let threshold: f32 = 1e-6;
         match self {
             Shape::Sphere { center, radius } => {
                 let oc = ray.origin - *center;
@@ -44,21 +61,22 @@ impl RayHit for Shape {
 
                 let discriminant = half_b * half_b - a * c;
                 if discriminant < 0.0 {
-                    return -1.0;
+                    return false;
                 }
 
                 let sqrtd = discriminant.sqrt();
                 let t1 = (-half_b - sqrtd) / a;
                 let t2 = (-half_b + sqrtd) / a;
 
-                // TODO: what root we should use?
-                if t1 > 1e-6 {
-                    return t1;
+                if (t1 < threshold || t1 > rec.t) && (t2 < threshold || t2 > rec.t) {
+                    return false;
                 }
-                if t2 > 1e-6 {
-                    return t2;
-                }
-                -1.0
+
+                rec.t = t1.min(t2);
+                rec.p = ray.at(rec.t);
+                rec.normal = (rec.p - *center).unit_vector();
+
+                true
             }
             Shape::Cube { center, side } => {
                 let half = side / 2.0;
@@ -66,13 +84,14 @@ impl RayHit for Shape {
                 let y = ((center.y - half)..=(center.y + half)).contains(&ray.direction.y);
                 let z = ((center.z - half)..=(center.z + half)).contains(&ray.direction.z);
 
-                if x && y && z { 1.0 } else { -1.0 }
+                //TODO: correctly define the t
+                x && y && z
             }
             _ => todo!(),
         }
     }
 }
 
-pub(crate) fn ray_hit<T: RayHit>(ray: &Ray, obj: &T) -> f32 {
-    obj.ray_hit(ray)
+pub(crate) fn ray_hit<T: RayHit>(ray: &Ray, obj: &T, rec: &mut HitRecord) -> bool {
+    obj.ray_hit(ray, rec)
 }

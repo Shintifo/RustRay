@@ -1,7 +1,7 @@
 use crate::vector::Vec3;
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, AddAssign, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, DivAssign, Mul, Sub, SubAssign};
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub(crate) struct PixelRGB {
@@ -113,5 +113,16 @@ impl Mul<&PixelRGB> for f32 {
     type Output = PixelRGB;
     fn mul(self, pixel: &PixelRGB) -> Self::Output {
         *pixel * self
+    }
+}
+
+impl DivAssign<u8> for PixelRGB {
+    fn div_assign(&mut self, rhs: u8) {
+        let r = (self.r / rhs).clamp(0, 255);
+        let g = (self.g / rhs).clamp(0, 255);
+        let b = (self.b / rhs).clamp(0, 255);
+        self.r = r;
+        self.g = g;
+        self.b = b;
     }
 }
